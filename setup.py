@@ -1,10 +1,16 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+import setuptools
 
-setup(name='YahooOAuth',
+with open("README.md", "r") as rm:
+    long_description = rm.read()
+
+setuptools.setup(name='yahoooauth',
     version=1.0,
     description='Python module to consume Yahoo Fantasy API',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url='https://github.com/rafaoneill/YahooOAuth',
     author='Rafael E. ONeill',
     author_email='rafael.oneill@gmail.com',
-    packages=['yahoo-oauth'])
+    packages=setuptools.find_packages())

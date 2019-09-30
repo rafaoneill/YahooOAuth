@@ -10,7 +10,7 @@ python3 -m pip install dist/yahoooauth-1.0-py3-none-any.whl --force --user
 ## Usage
 ```python
 import os
-from yahoooauth.yahoooauth import YahooOAuth
+from yahoooauth.yoauth import YahooOAuth
 
 # Load credentials file
 path = os.path.dirname(os.path.realpath(__file__))

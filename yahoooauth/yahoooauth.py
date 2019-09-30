@@ -3,6 +3,8 @@ import json
 import requests
 import webbrowser
 
+import yahoooauth.common.credentials as constant
+
 class YahooOAuth:
     AUTH_URL = 'https://api.login.yahoo.com/oauth2/request_auth?client_id={0}&redirect_uri=oob&response_type=code&language=en-us'
     TOKEN_URL = 'https://api.login.yahoo.com/oauth2/get_token'
@@ -24,12 +26,12 @@ class YahooOAuth:
 
         :raises exception: If a valid client id is not available.
         """
-        if not self.credentials['client_id']:
+        if not self.credentials[constant.CLIENT_ID]:
             raise Exception('A valid client id is required to get the authorization code.')
 
-        auth_url = self.AUTH_URL.format(self.credentials['client_id'])
+        auth_url = self.AUTH_URL.format(self.credentials[constant.CLIENT_ID])
         webbrowser.open(auth_url)
-        self.credentials['auth_code'] = input('Enter authorization code: ')
+        self.credentials[constant.AUTHORIZATION_CODE] = input('Enter authorization code: ')
         with open(self.credentials_file, 'w') as credentials_file:
             json.dump(self.credentials, credentials_file, indent=4)
     
@@ -42,7 +44,7 @@ class YahooOAuth:
         """
         data = json.loads(text)
         self.credentials = {**self.credentials, **data}
-        self.credentials['date_obtained'] = str(int((datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds()))
+        self.credentials[constant.DATE_OBTAINED] = str(int((datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds()))
         with open(self.credentials_file, 'w') as token_file:
             json.dump(self.credentials, token_file, indent=4)
 
@@ -52,20 +54,19 @@ class YahooOAuth:
 
         :raises exception: If a valid authorization code is not available
         """
-        if not self.credentials['auth_code']:
+        if not self.credentials[constant.AUTHORIZATION_CODE]:
             raise Exception('A valid authorization code is required to get the access token.')
 
         response = requests.post(self.TOKEN_URL,
             data = {
                 'grant_type':'authorization_code',
-                'code':self.credentials['auth_code'],
+                'code':self.credentials[constant.AUTHORIZATION_CODE],
                 'redirect_uri':'oob',
-                'client_id':self.credentials['client_id'],
-                'client_secret':self.credentials['client_secret']
+                'client_id':self.credentials[constant.CLIENT_ID],
+                'client_secret':self.credentials[constant.CLIENT_SECRET]
             })
         if response.status_code == 200:
             self.load_token_response(response.text)
-            return self.credentials['access_token']
         else:
             message = json.loads(response.text)
             raise Exception("ERROR: {0} - Description: {1}".format(message['error'],message['error_description']))
@@ -77,8 +78,8 @@ class YahooOAuth:
         :returns: Whether or not the stored access token has expired.
         """
         now_in_seconds = int((datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds())
-        time_remaining = (now_in_seconds - int(self.credentials['date_obtained']))
-        if time_remaining > self.credentials['expires_in']:
+        time_remaining = (now_in_seconds - int(self.credentials[constant.DATE_OBTAINED]))
+        if time_remaining > self.credentials[constant.EXPIRES_IN]:
             return True
         else:
             return False
@@ -89,20 +90,19 @@ class YahooOAuth:
 
         :raises exception: If the refresh token is not available.
         """
-        if not self.credentials['refresh_token']:
+        if not self.credentials[constant.REFRESH_TOKEN]:
             raise Exception('A valid refresh token is required to refresh the access token.')
 
         response = requests.post(self.TOKEN_URL,
             data = {
-                'client_id':self.credentials['client_id'],
-                'client_secret':self.credentials['client_secret'],
+                'client_id':self.credentials[constant.CLIENT_ID],
+                'client_secret':self.credentials[constant.CLIENT_SECRET],
                 'redirect_uri':'oob',
-                'refresh_token':self.credentials['refresh_token'],
+                'refresh_token':self.credentials[constant.REFRESH_TOKEN],
                 'grant_type':'refresh_token'
             })
         if response.status_code == 200:
             self.load_token_response(response.text)
-            return self.credentials['access_token']
         else:
             message = json.loads(response.text)
             raise Exception("ERROR: {0} - Description: {1}".format(message['error'],message['error_description']))

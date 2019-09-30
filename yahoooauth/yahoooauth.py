@@ -60,17 +60,17 @@ class YahooOAuth:
 
         response = requests.post(self.TOKEN_URL,
             data = {
-                'grant_type':'authorization_code',
-                'code':self.credentials[constant.AUTHORIZATION_CODE],
-                'redirect_uri':'oob',
-                'client_id':self.credentials[constant.CLIENT_ID],
-                'client_secret':self.credentials[constant.CLIENT_SECRET]
+                constant.GRANT_TYPE:constant.AUTHORIZATION_CODE,
+                constant.CODE:self.credentials[constant.AUTHORIZATION_CODE],
+                constant.REDIRECT_URI:'oob',
+                constant.CLIENT_ID:self.credentials[constant.CLIENT_ID],
+                constant.CLIENT_SECRET:self.credentials[constant.CLIENT_SECRET]
             })
         if response.status_code == 200:
             self.load_token_response(response.text)
         else:
             message = json.loads(response.text)
-            raise Exception(messages.ERROR_MESSAGE.format(message['error'],message['error_description']))
+            raise Exception(messages.ERROR_MESSAGE.format(message[constant.ERROR],message[constant.ERROR_DESCRIPTION]))
 
     def is_token_expired(self):
         """
@@ -96,14 +96,14 @@ class YahooOAuth:
 
         response = requests.post(self.TOKEN_URL,
             data = {
-                'client_id':self.credentials[constant.CLIENT_ID],
-                'client_secret':self.credentials[constant.CLIENT_SECRET],
-                'redirect_uri':'oob',
-                'refresh_token':self.credentials[constant.REFRESH_TOKEN],
-                'grant_type':'refresh_token'
+                constant.CLIENT_ID:self.credentials[constant.CLIENT_ID],
+                constant.CLIENT_SECRET:self.credentials[constant.CLIENT_SECRET],
+                constant.REDIRECT_URI:'oob',
+                constant.REFRESH_TOKEN:self.credentials[constant.REFRESH_TOKEN],
+                constant.GRANT_TYPE:constant.REFRESH_TOKEN
             })
         if response.status_code == 200:
             self.load_token_response(response.text)
         else:
             message = json.loads(response.text)
-            raise Exception(messages.ERROR_MESSAGE.format(message['error'],message['error_description']))
+            raise Exception(messages.ERROR_MESSAGE.format(message[constant.ERROR],message[constant.ERROR_DESCRIPTION]))

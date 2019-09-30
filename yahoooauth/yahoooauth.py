@@ -16,7 +16,6 @@ class YahooOAuth:
         credentials : str
             The name and path of the json file containing client credentials.
         """
-        print(os.path.dirname(os.path.abspath(credentials)))
         self.credentials_file = credentials
         with open(self.credentials_file) as json_file:
             data = json.load(json_file)

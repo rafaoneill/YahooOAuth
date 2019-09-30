@@ -53,7 +53,7 @@ class YahooOAuth:
         """
         Fetch the access token using the stored authorization code.
 
-        :raises exception: If a valid authorization code is not available
+        :raises exception: If a valid authorization code is not available.
         """
         if not self.credentials[constant.AUTHORIZATION_CODE]:
             raise Exception(messages.INVALID_AUTHORIZATION_CODE)

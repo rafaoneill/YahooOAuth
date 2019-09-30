@@ -7,7 +7,7 @@ credentials = os.path.join(path, 'credentials.json')
 oauth = YahooOAuth(credentials)
 
 # Obtain access token if not available
-if oauth.credentials['access_token']:
+if not oauth.credentials['access_token']:
     oauth.get_auth_code()
     oauth.fetch_access_token()
 else:

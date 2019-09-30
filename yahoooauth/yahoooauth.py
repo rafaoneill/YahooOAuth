@@ -2,116 +2,107 @@ import datetime
 import json
 import requests
 import webbrowser
-import os
 
 class YahooOAuth:
     AUTH_URL = 'https://api.login.yahoo.com/oauth2/request_auth?client_id={0}&redirect_uri=oob&response_type=code&language=en-us'
     TOKEN_URL = 'https://api.login.yahoo.com/oauth2/get_token'
 
-    def __init__(self, credentials: str):
-        """ Constructor.
-
-        Parameters
-        ----------
-        credentials : str
-            The name and path of the json file containing client credentials.
+    def __init__(self, credentials_file: str):
+        """ 
+        Constructor.
+        
+        :param credentials_file: The full path of the json file containing client credentials.
         """
-        self.credentials_file = credentials
+        self.credentials_file = credentials_file
         with open(self.credentials_file) as json_file:
-            data = json.load(json_file)
-            self.client_id = data['client_id']
-            self.client_secret = data['client_secret']
-            self.auth_code = data['auth_code']
+            self.credentials = json.load(json_file)
     
     def get_auth_code(self):
-        """ Gets authorization code from API. 
+        """ 
+        Gets authorization code from API. 
         Requires user to login to Yahoo account, allow access and enter auth code.
-        """
-        auth_url = self.AUTH_URL.format(self.client_id)
-        webbrowser.open(auth_url)
-        self.auth_code = input('Enter authorization code: ')
-        file = open(self.credentials_file)
-        data = json.load(file)
-        file.close()
-        data['auth_code'] = self.auth_code
-        with open(self.credentials_file, 'w') as credentials_file:
-            json.dump(data, credentials_file, indent=4)
-    
-    def was_auth_code_obtained(self):
-        """Checks whether the authorization code was already obtained or not.
 
-        Returns
-        -------
-        boolean
-            True if the authorization code was already obtained, false otherwise.
+        :raises exception: If a valid client id is not available.
         """
-        if len(self.auth_code) > 0:
-            return True
-        else:
-            return False
+        if not self.credentials['client_id']:
+            raise Exception('A valid client id is required to get the authorization code.')
+
+        auth_url = self.AUTH_URL.format(self.credentials['client_id'])
+        webbrowser.open(auth_url)
+        self.credentials['auth_code'] = input('Enter authorization code: ')
+        with open(self.credentials_file, 'w') as credentials_file:
+            json.dump(self.credentials, credentials_file, indent=4)
     
     def load_token_response(self, text : str):
-        """Loads access token response from Yahoo.
+        """
+        Loads access token response from Yahoo.
 
-        Parameters
-        ----------
-        text : str
-            The server response text.
+        :param text: The server response text.
+        :type text: str
         """
         data = json.loads(text)
-        self.access_token = data['access_token']
-        self.headers = {
-            'Authorization': 'Bearer ' + self.access_token
-        }
-        self.refresh_token = data['refresh_token']
-        self.expires_in = data['expires_in']
-        self.token_type = data['token_type']
-        self.xoauth_yahoo_guid = data['xoauth_yahoo_guid']
-        self.date_obtained = int((datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds())
-        data['date_obtained'] = str(self.date_obtained)
-        with open('token.json', 'w') as token_file:
-            json.dump(data, token_file, indent=4)
+        self.credentials = {**self.credentials, **data}
+        self.credentials['date_obtained'] = str(int((datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds()))
+        with open(self.credentials_file, 'w') as token_file:
+            json.dump(self.credentials, token_file, indent=4)
 
     def fetch_access_token(self):
-        """Fetch the access token using the stored authorization code."""
-        if len(self.auth_code) == 0:
+        """
+        Fetch the access token using the stored authorization code.
+
+        :raises exception: If a valid authorization code is not available
+        """
+        if not self.credentials['auth_code']:
             raise Exception('A valid authorization code is required to get the access token.')
+
+        response = requests.post(self.TOKEN_URL,
+            data = {
+                'grant_type':'authorization_code',
+                'code':self.credentials['auth_code'],
+                'redirect_uri':'oob',
+                'client_id':self.credentials['client_id'],
+                'client_secret':self.credentials['client_secret']
+            })
+        if response.status_code == 200:
+            self.load_token_response(response.text)
+            return self.credentials['access_token']
         else:
-            response = requests.post(self.TOKEN_URL,
-                data = {
-                    'grant_type':'authorization_code',
-                    'code':self.auth_code,
-                    'redirect_uri':'oob',
-                    'client_id':self.client_id,
-                    'client_secret':self.client_secret
-                })
-            if response.status_code == 200:
-                self.load_token_response(response.text)
-                return self.access_token
-            else:
-                print('An error occured while obtaining an access token.') # maybe raise an exception?
-    
+            message = json.loads(response.text)
+            raise Exception("ERROR: {0} - Description: {1}".format(message['error'],message['error_description']))
+
     def is_token_expired(self):
+        """
+        Checks whether the access token has expired or not.
+
+        :returns: Whether or not the stored access token has expired.
+        """
         now_in_seconds = int((datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds())
-        time_remaining = (now_in_seconds - int(self.date_obtained))
-        if time_remaining > self.expires_in:
+        time_remaining = (now_in_seconds - int(self.credentials['date_obtained']))
+        if time_remaining > self.credentials['expires_in']:
             return True
         else:
             return False
 
     def refresh_access_token(self):
+        """
+        Refresh the access token using the stored refresh token.
+
+        :raises exception: If the refresh token is not available.
+        """
+        if not self.credentials['refresh_token']:
+            raise Exception('A valid refresh token is required to refresh the access token.')
+
         response = requests.post(self.TOKEN_URL,
             data = {
-                'client_id':self.client_id,
-                'client_secret':self.client_secret,
+                'client_id':self.credentials['client_id'],
+                'client_secret':self.credentials['client_secret'],
                 'redirect_uri':'oob',
-                'refresh_token':self.refresh_token,
+                'refresh_token':self.credentials['refresh_token'],
                 'grant_type':'refresh_token'
             })
         if response.status_code == 200:
             self.load_token_response(response.text)
-            return self.access_token
+            return self.credentials['access_token']
         else:
-            print('An error occured while trying to refresh token.')
-    
-            
+            message = json.loads(response.text)
+            raise Exception("ERROR: {0} - Description: {1}".format(message['error'],message['error_description']))

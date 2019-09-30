@@ -1,14 +1,3 @@
-# YahooOAuth
-Python module to consume Yahoo Fantasy API
-
-## Compiling and installing package from source
-```shell
-python3 setup.py bdist_wheel
-python3 -m pip install dist/yahoooauth-1.0-py3-none-any.whl --force --user
-```
-
-## Usage
-```python
 import os
 from yahoooauth.yahoooauth import YahooOAuth
 
@@ -18,7 +7,7 @@ credentials = os.path.join(path, 'credentials.json')
 oauth = YahooOAuth(credentials)
 
 # Obtain access token if not available
-if not oauth.credentials['access_token']:
+if oauth.credentials['access_token']:
     oauth.get_auth_code()
     oauth.fetch_access_token()
 else:
@@ -26,4 +15,3 @@ else:
         oauth.refresh_access_token()
 
 print(oauth.credentials['access_token'])
-```

@@ -4,6 +4,7 @@ import requests
 import webbrowser
 
 import yahoooauth.common.credentials as constant
+import yahoooauth.common.messages as messages
 
 class YahooOAuth:
     AUTH_URL = 'https://api.login.yahoo.com/oauth2/request_auth?client_id={0}&redirect_uri=oob&response_type=code&language=en-us'
@@ -27,11 +28,11 @@ class YahooOAuth:
         :raises exception: If a valid client id is not available.
         """
         if not self.credentials[constant.CLIENT_ID]:
-            raise Exception('A valid client id is required to get the authorization code.')
+            raise Exception(messages.INVALID_CLIENT_ID)
 
         auth_url = self.AUTH_URL.format(self.credentials[constant.CLIENT_ID])
         webbrowser.open(auth_url)
-        self.credentials[constant.AUTHORIZATION_CODE] = input('Enter authorization code: ')
+        self.credentials[constant.AUTHORIZATION_CODE] = input(messages.INPUT_AUTHORIZATION_CODE)
         with open(self.credentials_file, 'w') as credentials_file:
             json.dump(self.credentials, credentials_file, indent=4)
     
@@ -55,7 +56,7 @@ class YahooOAuth:
         :raises exception: If a valid authorization code is not available
         """
         if not self.credentials[constant.AUTHORIZATION_CODE]:
-            raise Exception('A valid authorization code is required to get the access token.')
+            raise Exception(messages.INVALID_AUTHORIZATION_CODE)
 
         response = requests.post(self.TOKEN_URL,
             data = {
@@ -69,7 +70,7 @@ class YahooOAuth:
             self.load_token_response(response.text)
         else:
             message = json.loads(response.text)
-            raise Exception("ERROR: {0} - Description: {1}".format(message['error'],message['error_description']))
+            raise Exception(messages.ERROR_MESSAGE.format(message['error'],message['error_description']))
 
     def is_token_expired(self):
         """
@@ -91,7 +92,7 @@ class YahooOAuth:
         :raises exception: If the refresh token is not available.
         """
         if not self.credentials[constant.REFRESH_TOKEN]:
-            raise Exception('A valid refresh token is required to refresh the access token.')
+            raise Exception(messages.INVALID_REFRESH_TOKEN)
 
         response = requests.post(self.TOKEN_URL,
             data = {
@@ -105,4 +106,4 @@ class YahooOAuth:
             self.load_token_response(response.text)
         else:
             message = json.loads(response.text)
-            raise Exception("ERROR: {0} - Description: {1}".format(message['error'],message['error_description']))
+            raise Exception(messages.ERROR_MESSAGE.format(message['error'],message['error_description']))

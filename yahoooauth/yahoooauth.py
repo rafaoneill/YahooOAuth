@@ -2,6 +2,7 @@ import datetime
 import json
 import requests
 import webbrowser
+import os
 
 class YahooOAuth:
     AUTH_URL = 'https://api.login.yahoo.com/oauth2/request_auth?client_id={0}&redirect_uri=oob&response_type=code&language=en-us'
@@ -13,13 +14,15 @@ class YahooOAuth:
         Parameters
         ----------
         credentials : str
-            The name of the json file containing client credentials.
+            The name and path of the json file containing client credentials.
         """
-        self.credentials_file
-        data = json.loads(credentials)
-        self.client_id = data['client_id']
-        self.client_secret = data['client_secret']
-        self.auth_code = data['auth_code']
+        print(os.path.dirname(os.path.abspath(credentials)))
+        self.credentials_file = credentials
+        with open(self.credentials_file) as json_file:
+            data = json.load(json_file)
+            self.client_id = data['client_id']
+            self.client_secret = data['client_secret']
+            self.auth_code = data['auth_code']
     
     def get_auth_code(self):
         """ Gets authorization code from API. 
@@ -89,13 +92,13 @@ class YahooOAuth:
             else:
                 print('An error occured while obtaining an access token.') # maybe raise an exception?
     
-    def is_token_valid(self):
+    def is_token_expired(self):
         now_in_seconds = int((datetime.datetime.now() - datetime.datetime(1970,1,1)).total_seconds())
         time_remaining = (now_in_seconds - int(self.date_obtained))
         if time_remaining > self.expires_in:
-            return False
-        else:
             return True
+        else:
+            return False
 
     def refresh_access_token(self):
         response = requests.post(self.TOKEN_URL,

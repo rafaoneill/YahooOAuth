@@ -1,4 +1,5 @@
 # https://developer.yahoo.com/fantasysports/guide/player-resource.html
+# https://developer.yahoo.com/fantasysports/guide/players-collection.html
 
 # Fetch player key, id, name, editorial information, image, eligible positions, etc.
 # Params: {player_key}
@@ -24,3 +25,23 @@ YFANTASY_PLAYER_PERCENT_OWNED='/fantasy/v2/player/{0}/percent_owned'
 # Fetch average pick, average round and percent drafted.
 # Params: {player_key}
 YFANTASY_PLAYER_DRAFT_ANALYSIS='/fantasy/v2/player/{0}/draft_analysis'
+
+# Fetch all players within a league.
+# Params: {league_key}
+YFANTASY_ALL_PLAYERS_FOR_LEAGUE='/fantasy/v2/league/{0}/players'
+
+# Fetch all players from the leagues {league_key1} and {league_key2}
+# Params: {league_key1,league_key2,...}
+YFANTASY_ALL_PLAYERS_FOR_SPECIFIC_LEAGUES='/fantasy/v2/leagues;league_keys={0}/players'
+
+# Fetch all players within a team.
+# Params: {team_key}
+YFANTASY_ALL_PLAYERS_FOR_TEAM='/fantasy/v2/team/{0}/players'
+
+# Fetch all players from the teams {team_key1} and {team_key2}
+# Params: {team_key1,team_key2,...}
+YFANTASY_ALL_PLAYERS_FOR_SPECIFIC_TEAMS='/fantasy/v2/teams;team_keys={0}/players'
+
+# Fetch specific players {player_key1} and {player_key2}
+# Params: {player_key1,player_key2,...}
+YFANTASY_SPECIFIC_PLAYERS='/fantasy/v2/players;player_keys={0}'

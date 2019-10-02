@@ -1,4 +1,5 @@
 # https://developer.yahoo.com/fantasysports/guide/team-resource.html
+# https://developer.yahoo.com/fantasysports/guide/teams-collection.html
 # https://developer.yahoo.com/fantasysports/guide/roster-resource.html
 
 # Fetch team key, id, name, url, division ID, logos, and team manager information.
@@ -38,3 +39,21 @@ YFANTASY_TEAM_SPECIFIC_MATCHUPS='/fantasy/v2/team/{0}/matchups;weeks={1}'
 # Access the players collection within the roster.
 # Params: {team_key}
 YFANTASY_ROSTER_PLAYERS='/fantasy/v2/team/{0}/players'
+
+# Fetch all teams within league.
+YFANTASY_TEAMS='/fantasy/v2/league/{0}/teams'
+
+# Fetch specific teams {team_key1} and {team_key2}
+# Params: {team_key1,team_key2,...}
+YFANTASY_SPECIFIC_TEAMS='/fantasy/v2/teams;team_keys={0}'
+
+# Fetch all teams of the leagues {league_key1} and {league_key2}
+# Params: {league_key1,league_key2,...}
+YFANTASY_TEAMS_FOR_LEAGUES='/fantasy/v2/leagues;league_keys={0}/teams'
+
+# Fetch all teams for the logged in user
+YFANTASY_TEAMS_FOR_LOGGED_USER='/fantasy/v2/users;use_login=1/teams'
+
+# Fetch all teams for the logged in user for the games {game_key1} and {game_key2}
+# Params: {game_key1,game_key2,...}
+YFANTASY_TEAMS_FOR_LOGGED_USER_FOR_SPECIFIC_GAMES='/fantasy/v2/users;use_login=1/games;game_keys={0}/teams'

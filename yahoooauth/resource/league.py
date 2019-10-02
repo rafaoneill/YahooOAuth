@@ -1,4 +1,5 @@
 # https://developer.yahoo.com/fantasysports/guide/league-resource.html
+# https://developer.yahoo.com/fantasysports/guide/leagues-collection.html
 
 # Fetch league key, id, name, url, draft status, number of teams, and current week information.
 # Params: {league_key}
@@ -41,3 +42,7 @@ YFANTASY_LEAGUE_DRAFT_RESULTS='/fantasy/v2/league/{0}/draftresults'
 # Fetch league transactions -- adds, drops, and trades.
 # Params: {league_key}
 YFANTASY_LEAGUE_TRANSACTIONS='/fantasy/v2/league/{0}/transactions'
+
+# Fetch specific leagues {league_key1} and {league_key2}
+# Params: {league_key1,league_key2,...}
+YFANTASY_SPECIFIC_LEAGUES='/fantasy/v2/leagues;league_keys={0}'

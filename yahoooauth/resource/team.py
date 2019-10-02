@@ -1,4 +1,5 @@
 # https://developer.yahoo.com/fantasysports/guide/team-resource.html
+# https://developer.yahoo.com/fantasysports/guide/roster-resource.html
 
 # Fetch team key, id, name, url, division ID, logos, and team manager information.
 # Params: {team_key}
@@ -33,3 +34,7 @@ YFANTASY_TEAM_ALL_MATCHUPS='/fantasy/v2/team/{0}/matchups'
 # Fetch specific matchups for this team (for H2H leagues).
 # Params: {team_key} {weeks}
 YFANTASY_TEAM_SPECIFIC_MATCHUPS='/fantasy/v2/team/{0}/matchups;weeks={1}'
+
+# Access the players collection within the roster.
+# Params: {team_key}
+YFANTASY_ROSTER_PLAYERS='/fantasy/v2/team/{0}/players'
